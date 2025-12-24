@@ -15,7 +15,9 @@ import { ProfileType } from './profiles/profile-type.entity';
       synchronize: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      // HATA DÜZELTİLDİ: __dirname yerine process.cwd() kullanılarak 
+      // proje kökündeki uploads klasörünün doğru bulunması sağlandı.
+      rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
     ProfilesModule,

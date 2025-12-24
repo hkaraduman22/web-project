@@ -37,7 +37,7 @@ export class ProfilesController {
   }))
   create(@Body() createProfileDto: CreateProfileDto, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Photo is required');
-    const photoUrl = `http://localhost:3000/uploads/${file.filename}`;
+    const photoUrl = `http://localhost:4000/uploads/${file.filename}`;
     return this.profilesService.create(createProfileDto, photoUrl);
   }
 
@@ -52,7 +52,7 @@ export class ProfilesController {
       }),
     }))
   update(@Param('id', ParseIntPipe) id: number, @Body() updateProfileDto: UpdateProfileDto, @UploadedFile() file: Express.Multer.File) {
-    const photoUrl = file ? `http://localhost:3000/uploads/${file.filename}` : undefined;
+    const photoUrl = file ? `http://localhost:4000/uploads/${file.filename}` : undefined;
     return this.profilesService.update(id, updateProfileDto, photoUrl);
   }
 

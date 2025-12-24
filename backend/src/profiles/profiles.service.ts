@@ -14,8 +14,8 @@ export class ProfilesService implements OnModuleInit {
     @InjectRepository(ProfileType) private profileTypesRepository: Repository<ProfileType>,
   ) {}
 
-  // Veritabanı boşsa tipleri ekler
   async onModuleInit() {
+    // Veritabanı silindiği için başlangıçta tipleri tekrar oluşturacak
     const count = await this.profileTypesRepository.count();
     if (count === 0) {
       await this.profileTypesRepository.save([
@@ -31,6 +31,7 @@ export class ProfilesService implements OnModuleInit {
   }
 
   async listAll() {
+    // relations: ['profileType'] ile veriyi çekiyoruz
     return this.profilesRepository.find({ relations: ['profileType'] });
   }
 
@@ -46,7 +47,6 @@ export class ProfilesService implements OnModuleInit {
   async create(createProfileDto: CreateProfileDto, photoUrl: string) {
     if (createProfileDto.password !== createProfileDto.confirmPassword) {
       if(photoUrl) {
-          // Hata varsa yüklenen resmi sil
           const filePath = photoUrl.replace('http://localhost:3000/uploads/', './uploads/');
           try { fs.unlinkSync(filePath); } catch(e) {}
       }
@@ -56,8 +56,13 @@ export class ProfilesService implements OnModuleInit {
     const typeExists = await this.profileTypesRepository.findOneBy({ id: createProfileDto.profileTypeId });
     if (!typeExists) throw new BadRequestException('Invalid Profile Type ID');
 
+    // DTO'dan gelen ID'yi alıp TypeORM formatına çeviriyoruz
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { profileTypeId, ...rest } = createProfileDto;
+
     const newProfile = this.profilesRepository.create({
-      ...createProfileDto,
+      ...rest,
+      profileType: { id: profileTypeId } as ProfileType, // Kritik Nokta: İlişkiyi ID ile kuruyoruz
       photo: photoUrl,
     });
     
@@ -73,7 +78,15 @@ export class ProfilesService implements OnModuleInit {
          }
     }
 
-    Object.assign(profile, updateProfileDto);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { profileTypeId, ...rest } = updateProfileDto;
+
+    Object.assign(profile, rest);
+    
+    if (profileTypeId) {
+        profile.profileType = { id: profileTypeId } as ProfileType;
+    }
+
     if (photoUrl) profile.photo = photoUrl;
     return this.profilesRepository.save(profile);
   }

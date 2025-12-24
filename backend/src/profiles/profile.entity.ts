@@ -15,13 +15,13 @@ export class Profile {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   photo: string;
 
-  @Column() 
-  profileTypeId: number;
+  // DİKKAT: '@Column() profileTypeId: number;' satırı BURADAN SİLİNDİ.
+  // Çökme sebebi o satırdı. Sadece alttaki ilişki kalmalı:
 
-  @ManyToOne(() => ProfileType, (profileType) => profileType.profiles)
+  @ManyToOne(() => ProfileType, (profileType) => profileType.profiles, { eager: true })
   @JoinColumn({ name: 'profileTypeId' })
   profileType: ProfileType;
 }
